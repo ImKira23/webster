@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script> <!-- Realtime Database SDK -->
+
+    <link rel="stylesheet" href="static/css/settings.css">
+</head>
+<body>
+
+    <h2>Settings</h2>
+
+    <div id="user-info">
+        <img id="profile-pic" src="" alt="Profile Picture" style="width: 100px; height: 100px; border-radius: 50%;">
+        <p><strong>Name:</strong> <span id="user-name"></span></p>
+        <p><strong>Email:</strong> <span id="user-email"></span></p>
+    </div>
+
+    <form id="settings-form">
+        <label for="gender">Gender:</label>
+        <select id="gender">
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob">
+
+        <label for="address">Address:</label>
+        <input type="text" id="address" placeholder="Enter your address">
+
+        <button type="submit" id="saveChanges">Save Changes</button>
+    </form>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyApWRrgDN5iGhYCICRVQhNhSTkl9ba2MNM",
+            authDomain: "webster-38e8c.firebaseapp.com",
+            databaseURL: "https://webster-38e8c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "webster-38e8c",
+            storageBucket: "webster-38e8c.appspot.com",
+            messagingSenderId: "583319297842",
+            appId: "1:583319297842:web:1d7a42a67349913306412b",
+            measurementId: "G-0PY7BR86EV"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Load user data when the page loads
+        window.onload = function() {
+            // Check if user is signed in
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    // Display user's name, email, and profile picture
+                    document.getElementById('user-name').innerText = user.displayName || 'N/A';
+                    document.getElementById('user-email').innerText = user.email || 'N/A';
+                    document.getElementById('profile-pic').src = user.photoURL || 'default-profile-pic.png'; // Default image if no profile picture
+                    
+                    // Load additional user data from the database
+                    var userId = user.uid;
+                    firebase.database().ref('users/' + userId).once('value').then((snapshot) => {
+                        if (snapshot.exists()) {
+                            var userData = snapshot.val();
+                            document.getElementById('gender').value = userData.gender || '';
+                            document.getElementById('dob').value = userData.birthdate || '';
+                            document.getElementById('address').value = userData.address || '';
+                        }
+                    });
+                } else {
+                    alert("No user is signed in.");
+                }
+            });
+        };
+
+        // Event listener for the save changes button
+        document.getElementById('settings-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form from submitting
+            
+            var user = firebase.auth().currentUser;
+            if (user) {
+                var userId = user.uid;
+                var name = user.displayName; // Get the user's display name
+                var email = user.email; // Get the user's email
+                var gender = document.getElementById('gender').value;
+                var dob = document.getElementById('dob').value;
+                var address = document.getElementById('address').value;
+
+                // Update user data in Firebase Realtime Database
+                firebase.database().ref('users/' + userId).update({
+                    name: name, // Save the name
+                    email: email, // Save the email
+                    gender: gender,
+                    birthdate: dob,
+                    address: address
+                }).then(() => {
+                    alert("Profile updated successfully!");
+                    window.location.href = "hub.html"; // Redirect to Hub page
+                }).catch(error => {
+                    console.error("Error updating profile: ", error);
+                });
+            } else {
+                alert("No user is signed in.");
+            }
+        });
+    </script>
+
+    <script src="static/js/settings.js"></script> <!-- Existing script for other functionalities -->
+    
+</body>
+</html>

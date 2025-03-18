@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub Page</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script> <!-- Realtime Database SDK -->
+
+</head>
+<body>
+    <h2>Hub</h2>
+
+    <button onclick="window.location.href='settings.html';">Go to Settings</button>
+    <a href="settings.html">Settings</a>
+
+    <!-- User Profile Info -->
+    <div id="user-info">
+        <img id="user-photo" src="" alt="Profile Photo" width="100">
+        <p><strong>Name:</strong> <span id="user-name"></span></p>
+        <p><strong>Email:</strong> <span id="user-email"></span></p>
+        <p><strong>Gender:</strong> <span id="user-gender"></span></p>
+        <p><strong>Date of Birth:</strong> <span id="user-dob"></span></p>
+        <p><strong>Address:</strong> <span id="user-address"></span></p>
+    </div>
+
+    <!-- Logout Button -->
+    <button id="logout">Logout</button>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyApWRrgDN5iGhYCICRVQhNhSTkl9ba2MNM",
+            authDomain: "webster-38e8c.firebaseapp.com",
+            databaseURL: "https://webster-38e8c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "webster-38e8c",
+            storageBucket: "webster-38e8c.appspot.com",
+            messagingSenderId: "583319297842",
+            appId: "1:583319297842:web:1d7a42a67349913306412b",
+            measurementId: "G-0PY7BR86EV"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database(); // Initialize database reference
+
+        // Check if user is logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById("user-name").textContent = user.displayName || 'N/A';
+                document.getElementById("user-email").textContent = user.email || 'N/A';
+                document.getElementById("user-photo").src = user.photoURL || 'default-profile-pic.png';
+
+                // Load additional user data from the database
+                const userId = user.uid;
+                database.ref('users/' + userId).once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        document.getElementById("user-gender").textContent = userData.gender || 'N/A';
+                        document.getElementById("user-dob").textContent = userData.birthdate || 'N/A';
+                        document.getElementById("user-address").textContent = userData.address || 'N/A';
+                    } else {
+                        console.log("No additional user data found.");
+                    }
+                }).catch((error) => {
+                    console.error("Error fetching user data: ", error);
+                });
+            } else {
+                // Redirect to login page if not logged in
+                window.location.href = "login.html";
+            }
+        });
+
+        // Logout Function
+        document.getElementById("logout").addEventListener("click", () => {
+            auth.signOut().then(() => {
+                alert("Logged out successfully!");
+                window.location.href = "login.html";
+            }).catch((error) => {
+                console.error("Logout Error:", error);
+            });
+        });
+    </script>
+</body>
+</html>

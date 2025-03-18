@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with Google</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <h2>Login with Google</h2>
+    <button id="googleLogin">Sign in with Google</button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const firebaseConfig = {
+                apiKey: "AIzaSyApWRrgDN5iGhYCICRVQhNhSTkl9ba2MNM",
+                authDomain: "webster-38e8c.firebaseapp.com",
+                projectId: "webster-38e8c",
+                storageBucket: "webster-38e8c.appspot.com",
+                messagingSenderId: "583319297842",
+                appId: "1:583319297842:web:1d7a42a67349913306412b",
+                measurementId: "G-0PY7BR86EV"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+
+            // 🔹 Automatic Redirect If Already Logged In
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    console.log("User already logged in:", user);
+                    window.location.href = "hub.html";  // Change this to your target page
+                }
+            });
+
+            // 🔹 Google Login Button
+            document.getElementById("googleLogin").addEventListener("click", function () {
+                console.log("Login button clicked!");
+                const provider = new firebase.auth.GoogleAuthProvider();
+
+                // 🔹 Mas Madaling Testing (Popup)
+                auth.signInWithPopup(provider)
+                    .then((result) => {
+                        console.log("User signed in:", result.user);
+                        alert("Login Successful! Redirecting...");
+                        window.location.href = "hub.html";  // Redirect to Hub Page
+                    })
+                    .catch((error) => {
+                        console.error("Error signing in:", error);
+                        alert("Login Failed: " + error.message);
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
